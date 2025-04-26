@@ -9,6 +9,8 @@ public record TaskDTO(
         String description,
 
         @NotBlank(message = "Status is required")
-        String status
+        String status,
+
+        long userId
 ) {
 }

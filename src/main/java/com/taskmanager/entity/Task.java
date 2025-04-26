@@ -26,7 +26,7 @@ public class Task {
     @Column(nullable = false)
     private String status; // e.g "TODO", "IN_PROGRESS", "DONE"
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
