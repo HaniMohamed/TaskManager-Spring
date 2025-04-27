@@ -5,10 +5,9 @@ import com.taskmanager.entity.Task;
 import com.taskmanager.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -35,12 +34,13 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public  ResponseEntity<Task> getTaskByID(@PathVariable long id){
-        return  ResponseEntity.ok(taskService.getTaskById(id));
+    public ResponseEntity<Task> getTaskByID(@PathVariable long id) {
+        return ResponseEntity.ok(taskService.getTaskById(id));
     }
 
     @GetMapping
-    public  ResponseEntity<List<Task>> getUserTasks(){
-        return  ResponseEntity.ok(taskService.getTasksByUser());
+    public ResponseEntity<Page<Task>> getUserTasks(@RequestParam(defaultValue = "0") int pageNumber,
+                                                   @RequestParam(defaultValue = "10") int pageSize) {
+        return ResponseEntity.ok(taskService.getTasksByUser(pageNumber, pageSize));
     }
 }

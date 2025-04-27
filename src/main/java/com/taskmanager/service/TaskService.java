@@ -7,6 +7,9 @@ import com.taskmanager.entity.User;
 import com.taskmanager.repository.TaskRepository;
 import com.taskmanager.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -69,9 +72,10 @@ public class TaskService {
         return task;
     }
 
-    public List<Task> getTasksByUser() {
+    public Page<Task> getTasksByUser(int pageNum, int pageSize) {
         User loggedInUser = getLoggedInUser();
-        return taskRepository.findByUserId(loggedInUser.getId());
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        return taskRepository.findByUserId(loggedInUser.getId(), pageable);
     }
 
     private User getLoggedInUser() {
