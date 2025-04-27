@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
@@ -22,7 +24,23 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public  ResponseEntity<Task> updateTask(@Valid @RequestBody TaskDTO taskDTO, @PathVariable long id){
-        return  ResponseEntity.ok(taskService.updateTask(taskDTO, id));
+    public ResponseEntity<Task> updateTask(@Valid @RequestBody TaskDTO taskDTO, @PathVariable long id) {
+        return ResponseEntity.ok(taskService.updateTask(taskDTO, id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTask(@PathVariable long id) {
+        taskService.deleteTask(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}")
+    public  ResponseEntity<Task> getTaskByID(@PathVariable long id){
+        return  ResponseEntity.ok(taskService.getTaskById(id));
+    }
+
+    @GetMapping
+    public  ResponseEntity<List<Task>> getUserTasks(){
+        return  ResponseEntity.ok(taskService.getTasksByUser());
     }
 }
