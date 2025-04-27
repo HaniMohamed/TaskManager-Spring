@@ -4,6 +4,7 @@ package com.taskmanager.service;
 import com.taskmanager.dto.TaskDTO;
 import com.taskmanager.entity.Task;
 import com.taskmanager.entity.User;
+import com.taskmanager.exception.ApiException;
 import com.taskmanager.repository.TaskRepository;
 import com.taskmanager.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class TaskService {
@@ -32,12 +31,12 @@ public class TaskService {
 
     public Task updateTask(TaskDTO taskDTO, long taskID) {
         Task task = taskRepository.findById(taskID)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+                .orElseThrow(() -> new ApiException("Task not found", "TASK_NOT_FOUND"));
 
         User loggedInUser = getLoggedInUser();
         if (!task.getUser().getUsername().equals(loggedInUser.getUsername())
                 && !loggedInUser.getRole().contains("ROLE_ADMIN")) {
-            throw new IllegalArgumentException("Unauthorized access to task");
+            throw new ApiException("Unauthorized access to task", "UNAUTHORIZED");
         }
 
         task.setTitle(taskDTO.title());
@@ -49,12 +48,12 @@ public class TaskService {
 
     public void deleteTask(long taskID) {
         Task task = taskRepository.findById(taskID)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Task"));
+                .orElseThrow(() -> new ApiException("Cannot find Task", "TASK_NOT_FOUND"));
         User loggedInUser = getLoggedInUser();
 
         if (!task.getUser().getId().equals(loggedInUser.getId())
                 && !loggedInUser.getRole().contains("ADMIN")) {
-            throw new IllegalArgumentException(("Unauthorized access to task"));
+            throw new ApiException("Unauthorized access to task", "UNAUTHORIZED");
         }
 
         taskRepository.delete(task);
@@ -62,12 +61,12 @@ public class TaskService {
 
     public Task getTaskById(long taskId) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Task"));
+                .orElseThrow(() -> new ApiException("Cannot find Task", "TASK_NOT_FOUND"));
 
         User loggedInUser = getLoggedInUser();
         if (!task.getUser().getId().equals(loggedInUser.getId())
                 && !loggedInUser.getRole().contains("ADMIN")) {
-            throw new IllegalArgumentException(("Unauthorized access to task"));
+            throw new ApiException("Unauthorized access to task", "UNAUTHORIZED");
         }
         return task;
     }
@@ -81,6 +80,6 @@ public class TaskService {
     private User getLoggedInUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ApiException("User not found", "UNAUTHORIZED"));
     }
 }

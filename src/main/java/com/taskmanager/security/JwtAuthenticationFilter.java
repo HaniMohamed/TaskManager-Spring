@@ -1,5 +1,7 @@
 package com.taskmanager.security;
 
+import com.taskmanager.exception.ApiException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                 }
             } catch (Exception e) {
-                // Invalid token, proceed without authentication
+                //
             }
         }
 

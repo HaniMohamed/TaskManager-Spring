@@ -4,6 +4,7 @@ import com.taskmanager.security.JwtAuthenticationFilter;
 import com.taskmanager.security.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -29,6 +30,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll()
                         .requestMatchers("/api/tasks/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
+                ).exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"message\": \"Invalid or expired JWT token\", \"errorCode\": \"INVALID_TOKEN\", \"timestamp\": \"" + java.time.LocalDateTime.now() + "\"}");
+                        })
                 )
                 .csrf(csrf -> csrf.disable()).sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
