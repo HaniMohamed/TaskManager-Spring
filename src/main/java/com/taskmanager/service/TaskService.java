@@ -23,10 +23,16 @@ public class TaskService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AuditLogService auditLogService;
+
     public Task createTask(TaskDTO taskDTO) {
 
         Task newTask = new Task(taskDTO.title(), taskDTO.description(), taskDTO.status(), getLoggedInUser());
-        return taskRepository.save(newTask);
+        Task savedTask = taskRepository.save(newTask);
+        auditLogService.logAction("TASK_CREATED", "Task ID: " + savedTask.getId() + ", Title: " + savedTask.getTitle()
+                + ", Description: " + savedTask.getDescription());
+        return savedTask;
     }
 
     public Task updateTask(TaskDTO taskDTO, long taskID) {
@@ -42,7 +48,12 @@ public class TaskService {
         task.setTitle(taskDTO.title());
         task.setStatus(taskDTO.status());
         task.setDescription(taskDTO.description());
-        return taskRepository.save(task);
+
+        Task savedTask = taskRepository.save(task);
+
+        auditLogService.logAction("TASK_UPDATED", "Task ID: " + savedTask.getId() + ", Title: " + savedTask.getTitle()
+                + ", Description: " + savedTask.getDescription());
+        return savedTask;
 
     }
 
@@ -56,6 +67,8 @@ public class TaskService {
             throw new ApiException("Unauthorized access to task", "UNAUTHORIZED");
         }
 
+        auditLogService.logAction("TASK_DELETED", "Task ID: " + task.getId() + ", Title: " + task.getTitle()
+                + ", Description: " + task.getDescription());
         taskRepository.delete(task);
     }
 
@@ -68,12 +81,17 @@ public class TaskService {
                 && !loggedInUser.getRole().contains("ADMIN")) {
             throw new ApiException("Unauthorized access to task", "UNAUTHORIZED");
         }
+
+        auditLogService.logAction("TASK_FETCHED_BY_ID", "Task ID: " + task.getId() + ", Title: " + task.getTitle()
+                + ", Description: " + task.getDescription());
         return task;
     }
 
     public Page<Task> getTasksByUser(int pageNum, int pageSize) {
         User loggedInUser = getLoggedInUser();
         Pageable pageable = PageRequest.of(pageNum, pageSize);
+        auditLogService.logAction("USER_FETCHED_ALL_TASKS", "User ID: " + loggedInUser.getId() + ", PageNum: " + pageNum
+                + ", PageSize: " + pageSize);
         return taskRepository.findByUserId(loggedInUser.getId(), pageable);
     }
 
