@@ -6,7 +6,6 @@ import com.taskmanager.entity.Task;
 import com.taskmanager.entity.User;
 import com.taskmanager.repository.TaskRepository;
 import com.taskmanager.repository.UserRepository;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,7 @@ public class TaskService {
 
     public Task createTask(TaskDTO taskDTO) {
 
-        Task newTask = new Task(taskDTO.title(), taskDTO.description(), taskDTO.status(), getUser());
+        Task newTask = new Task(taskDTO.title(), taskDTO.description(), taskDTO.status(), getLoggedInUser());
         return taskRepository.save(newTask);
     }
 
@@ -30,10 +29,8 @@ public class TaskService {
         Task task = taskRepository.findById(taskID)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
 
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        String role = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
-
-        if (!task.getUser().getUsername().equals(username) && !role.contains("ROLE_ADMIN")) {
+        User loggedInUser = getLoggedInUser();
+        if (!task.getUser().getUsername().equals(loggedInUser.getUsername()) && !loggedInUser.getRole().contains("ROLE_ADMIN")) {
             throw new IllegalArgumentException("Unauthorized access to task");
         }
 
@@ -44,7 +41,7 @@ public class TaskService {
 
     }
 
-    private User getUser() {
+    private User getLoggedInUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
