@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,9 +40,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     userDetails, null, userDetails.getAuthorities()
                             )
                     );
+                }else{
+                    throw new ServletException("TOKEN NOT VALID");
                 }
             } catch (Exception e) {
-                //
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                response.getWriter().write("{\"message\": \"Invalid or expired JWT token\", \"errorCode\": \"INVALID_TOKEN\", \"timestamp\": \"" + java.time.LocalDateTime.now() + "\"}");
+                response.setContentType("application/json");
+                return;
             }
         }
 

@@ -31,12 +31,6 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui.html","/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/tasks/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
-                ).exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"message\": \"Invalid or expired JWT token\", \"errorCode\": \"INVALID_TOKEN\", \"timestamp\": \"" + java.time.LocalDateTime.now() + "\"}");
-                        })
                 )
                 .csrf(csrf -> csrf.disable()).sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
